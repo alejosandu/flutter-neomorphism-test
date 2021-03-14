@@ -37,14 +37,16 @@ class Test extends StatelessWidget {
   final double offsetValue = 5;
   final double blurRadius = 5;
 
+  final Color backgroundColor = Color.fromARGB(255, 220, 220, 220);
   final Color primaryColor = Color.fromARGB(255, 235, 235, 235);
-  final Color secondaryColor = Color.fromARGB(255, 220, 220, 220);
+  final Color secondaryColor = Color.fromARGB(255, 240, 240, 240);
   final Color thirdthColor = Color.fromARGB(255, 200, 210, 220);
+  final Color iconColor = Color.fromARGB(255, 220, 220, 220);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 250, 250, 250),
+      backgroundColor: backgroundColor,
       body: Container(
         alignment: Alignment.center,
         child: Column(
@@ -54,6 +56,7 @@ class Test extends StatelessWidget {
               primaryColor: primaryColor,
               secondaryColor: secondaryColor,
               thirdthColor: thirdthColor,
+              iconColor: iconColor,
             ),
           ],
         ),
@@ -66,12 +69,14 @@ class CustomButton extends StatefulWidget {
   final Color primaryColor;
   final Color secondaryColor;
   final Color thirdthColor;
+  final Color iconColor;
 
   CustomButton({
     Key key,
     @required this.primaryColor,
     @required this.secondaryColor,
     @required this.thirdthColor,
+    @required this.iconColor,
   }) : super(key: key);
 
   @override
@@ -83,22 +88,30 @@ class _CustomButtonState extends State<CustomButton> {
 
   double size = 300;
   double radius = 50;
-  final Duration duration = Duration(milliseconds: 50);
+  double bevel = 10;
+  double gradientPressed = 0;
+  double offset = 10;
+  final Duration duration = Duration(milliseconds: 40);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (details) {
+    return Listener(
+      onPointerDown: (_) {
         setState(() {
-          size = 280;
+          size = 290;
           radius = 70;
+          gradientPressed = .2;
+          bevel = 0;
+          offset = 0;
         });
       },
-      onTapUp: (details) {
-        print(details);
+      onPointerUp: (_) {
         setState(() {
           size = 300;
           radius = 50;
+          gradientPressed = 0;
+          bevel = 10;
+          offset = 10;
         });
       },
       child: AnimatedContainer(
@@ -107,7 +120,7 @@ class _CustomButtonState extends State<CustomButton> {
             return Icon(
               Icons.play_arrow_rounded,
               size: value * .7,
-              color: widget.secondaryColor,
+              color: widget.iconColor,
             );
           },
           tween: Tween(begin: size, end: size),
@@ -117,18 +130,36 @@ class _CustomButtonState extends State<CustomButton> {
         height: size,
         width: size,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(radius)),
+          borderRadius: BorderRadius.all(Radius.circular(50)),
           color: widget.primaryColor,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.lerp(
+                widget.primaryColor,
+                widget.thirdthColor,
+                gradientPressed * 2,
+              ),
+              widget.primaryColor,
+              Color.lerp(
+                widget.primaryColor,
+                Colors.white,
+                gradientPressed * 8,
+              ),
+            ],
+            stops: [.15, .5, .7],
+          ),
           boxShadow: [
             BoxShadow(
               color: widget.secondaryColor,
-              offset: Offset(-offsetValue, -offsetValue),
-              blurRadius: 10,
+              offset: -Offset(offset, offset),
+              blurRadius: bevel,
             ),
             BoxShadow(
               color: widget.thirdthColor,
-              offset: Offset(offsetValue, offsetValue),
-              blurRadius: 10,
+              offset: Offset(offset, offset),
+              blurRadius: bevel,
             ),
           ],
         ),
